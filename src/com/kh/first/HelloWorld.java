@@ -21,6 +21,8 @@ public class HelloWorld { // HelloWorld 클래스 영영 시작(클래스 선언부)
 	 */
 	
 	public static void main(String[] args ) { // main 메소드 영영 시작(메소드 선언부)
+		
+		test();
 		System.out.println("Hi Everyone!!");
 		
 		/*
@@ -33,6 +35,15 @@ public class HelloWorld { // HelloWorld 클래스 영영 시작(클래스 선언부)
 		 * 프로그램이 실행될 때 가장 먼저 찾아져서 실행되는 메소드
 		 * 클래스에 무조건 main 메소드가 존재할 필요는 없지만 프로그램당 무조건 최소 1개는 존재해야 한다.
 		 */
+		
+		test(); // 메소드를 호출한다 : test 메소드 실행
 	}
-
+	
+	// main메소드와 일반메소드의 차이는?
+	public static void test() {
+		
+		System.out.println("test 메소드 실행중!!");
+		
+	}
+	
 }
