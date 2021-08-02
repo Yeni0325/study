@@ -128,8 +128,58 @@ public class A_Variable {
 		
 		// 대표적인 상수의 예 : 3.14 (파이, 원주율)
 		System.out.println("파이 : " + Math.PI);
+		
+		
+		//번외(가독성을 위해 '_'사용 가능)
+		int etc = 999_999_999;    
+		System.out.println("etc : " + etc);
+		
+		
+		//*변수명명 규칙*
+		int number; 
+		
+		//1. int number; //같은 영역 내에 중복된 이름 Duplicate(중복) 불가!!!
+		                 //그러나 대소문자는 구분하기 때문에 int numBer;은 가능하다!
+		
+		//2. 예약어(이미 자바에서 사용되고 있는 키워드) 불가!
+		/*
+		int true; 
+		int false;
+		int class;
+		int public;
+		int abstract;
+		*/
+		
+		//3. 숫자 사용은 가능하나 숫자로 시작하는 것은 안된다!
+		int number1;
+		int num1ber;
+		//int 1number;
+		
+		//4.특수문자 사용은 가능하나 '_'와 '$'만 가능하다.
+		int number_1;
+		int _number;
+		int number$1;
+		//int number!1;
+		//int number#1;
+		
+		//권장사항 (오류는 안나나 지켜줬으면 하는 것) 개발자간의 규칙(매너)
+		//1)낙타표기법(두번째 단어부터는 첫글자를 대문자로 작성)
+		String username; // 관례상 틀림
+		String userName; // 관례상 맞는 표현
+		String userNameTest;
+		
+		//2)한글사용가능하나 무조건 영문으로!
+		int 나이; //한글을 사용하지 않는 환경에서는 오류를 발생시킬 수 있음!
+		int userAge;	
 	}
 	
+	/*
+	 *  **정리**
+	 *  -변수에 넣는 값(리터럴) : 프로그램상에 필요한 명시적인 값
+	 *                    또는 사용자가 마우스 또는 키보드로 입력한 값
+	 * 
+	 *  -변수 : 값을 저장하기 위한 공간 (메모리에 값을 기록하기 위한 공간)
+	 */
 }
 
 
