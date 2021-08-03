@@ -79,6 +79,8 @@ public class B_KeyboardInput {
 		// xxx님은 xx살이며, 사는 곳은 xxxxxx이고, 키는 xxx.xcm입니다.
 		System.out.println(name + "님은 " + age + "살이며, 사는 곳은 " + address + "이고, 키는 " + height + "cm입니다.");
 		
+		System.out.printf("%s님은 %d살이며, 사는 곳은 %s이고, 키는 %.fcm입니다.", name, age, address, height); //printf문 사용해서 출력하는 방법
+		
 	}
 	
 	public void inputTest4() {
