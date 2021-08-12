@@ -165,9 +165,23 @@ public class A_For {
 		
 		Scanner sc = new Scanner(System.in);
 		
-		System.out.print("정수 : ");
-		int num = sc.nextInt();
 		
+		while(true) {
+			System.out.print("1이상의 정수 : ");
+			int num = sc.nextInt();
+		
+			if(num>=1) { //잘 입력했을 경우 => 1에서부터 사용자가 입력한 수까지의 총합계 출력 후 반복문 빠져나가기
+				int sum = 0;
+				for(int i=1;i<=num;i++) { // i값이 1에서부터 num까지 매번 1씩 증가되는동안 반복 수행
+					sum+=i;
+			}
+				
+				System.out.println("1에서부터 " + num + "까지의 총 합계 : " + sum);
+				break;
+			
+			}else { // 잘못입력했을경우 => 오류 구문 출력 후 다시 입력받을 수 있게 유도
+				System.out.println("잘못입력했습니다. 다시입력해주세요");
+		}
 		/* int sum = 0;
 		 * 
 		 * sum +=1;
@@ -178,14 +192,8 @@ public class A_For {
 		 * 누적해서 더해주고자하는 값이 1에서부터 num까지 1씩 증가
 		 */
 		
-		int sum = 0;
-		
-		for(int i=1;i<=num;i++) { // i값이 1에서부터 num까지 매번 1씩 증가되는동안 반복 수행
-			sum+=i;
 		}
-		System.out.println("1에서부터 " + num + "까지의 총 합계 : " + sum);
 	}
-	
 	public void method8() {
 		// 1에서부터 어떤 랜덤값(1~10사이의 랜덤값)까지의 총 합계
 		
@@ -301,4 +309,98 @@ public class A_For {
 		}
 	}
 	
+	public void method13() {
+		// 랜덤값(2부터 9사이의 랜덤값)으로 구구단 계산하기
+		// 끝에 + x의 값은 시작값, * x은 몇개의 값을 구할건지에 해당!
+		
+		int dan = (int)(Math.random() * 8 + 2);
+				 // 0.0 <= <1.0
+		         // 0.0 <= <8.0
+		         // 2.0 <= <10.0 
+		
+		System.out.println("===" + dan + "단 ===");
+		for(int i=1;i<=9;i++) {
+			System.out.printf("%d x %d = %d\n", dan, i, dan*i);
+		}
+		
+	}
+	
+	// 중첩 for문 (안쪽에 있는 반복문을 다시 반복)
+	public void method14() {
+				// 1 2 3 4 5
+			for(int j=1;j<=3;j++) {	
+				for(int i=1;i<=5;i++) {
+					System.out.print(i + " ");
+				}
+				System.out.println();
+			}
+	}
+	
+	public void method15() {
+		// ****
+		// ****
+		// ****
+		// ****
+		
+		// 행은 1~4까지 반복                          => 바깥쪽 for문
+		// 매 행 고정일 때 열은 1~4까지 반복    => 안쪽 for문
+		for(int i=1;i<=4;i++) {
+			
+			for(int j=1;j<=4;j++) {
+				System.out.print("*");
+			}
+			System.out.println();
+		}
+		
+	}
+	
+	public void method16() {
+		// 1*** => i == j (1행 1열일 때)
+		// *2** => i == j (2행 2열일 때)
+		// **3* => i == j (3행 3열일 때)
+		// ***4 => i == j (4행 4열일 때)     => 행과 열이 일치할 때 숫자를 출력! 아닐경우 * 출력!
+		
+		for(int i=1;i<=4;i++) {
+			
+			for(int j=1;j<=4;j++) {
+				
+				if(i == j) {
+				System.out.print(i);
+				}else {
+				System.out.print("*");
+				}
+				
+			}
+			
+			System.out.println();
+		}
+		
+	}
+	
+	public void method17() {
+		// 2단부터 9단까지 출력
+		
+		//int dan = 2;
+		
+		for(int dan=2;dan<=9;dan++) {
+			
+			System.out.println("=== " + dan + "단 ===");
+			for(int i=1;i<=9;i++) {
+				System.out.printf("%d x %d = %d\n", dan, i, dan*i);
+			}
+			System.out.println();
+		}
+		
+	}
+	
+	public void method18() {
+		
+		for(;;) { // => 아무것도 입력하지 않을 경우 무한대로 값을 입력한다. 조건식 자리 생략 시 기본적으로 true!
+			      
+			System.out.println("안녕");
+		}
+		
+	}
+			
+		
 }
