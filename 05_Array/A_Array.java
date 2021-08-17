@@ -333,6 +333,9 @@ public class A_Array {
 		System.out.print("문자열을 입력하시오 : ");
 		String str = sc.nextLine();
 		
+		System.out.print("찾고자하는 문자 : ");
+		char ch = sc.nextLine().charAt(0);
+		
 		//2. char배열 생성해두기 (이때 배열의 크기 == 문자열의 길이만큼)
 		// 문자열 길이를 알아내려면 ? 문자열.length()
 		char[] arr = new char[str.length()];
@@ -352,10 +355,90 @@ public class A_Array {
 		}
 		
 		//4. 반복문 활용해서 해당 배열의 0번~마지막 인덱스까지 담긴 값을 출력
+		
+		int count = 0; //일치하는 문자가 존재할 경우 매번 1씩 증가
+		
 		for(int i=0;i<arr.length; i++) {
 			System.out.println(arr[i]);
 			
+			if(ch==arr[i]) {
+				count++;
+			}
 		}
+		
+		System.out.println("찾아진 문자 갯수 : " + count);
+		
+	}
+	
+	public void method11() {
+		
+		//1. 사용자에게 배열의 길이 입력받은 후 해당 크기만큼의 정수배열 생성
+		
+		Scanner sc = new Scanner(System.in);
+		System.out.print("배열의 길이를 입력하시오 : ");
+		int size = sc.nextInt();
+		
+		int[] arr = new int[size];
+	
+		//2. 반복문을  활용해서 0~마지막 인덱스까지 매번 1~100사이의 랜덤값 발생시켜 대입
+		
+		for(int i=0; i<arr.length; i++) {
+			arr[i] = (int)(Math.random() * 100 + 1);
+		}
+		
+		//3. 반복문 활용해서 0~마지막 인덱스까지 담긴 값을 출력과 동시에
+		//   해당 인덱스에 담긴 값이 짝수인 값들의 총 합 구하기
+		int sum = 0;
+		for(int i=0; i<arr.length; i++) {
+			System.out.println(arr[i]);
+			
+			if(i % 2 == 0) {
+				sum += arr[i];
+
+			}
+		}
+		
+		
+		
+		//4. 위에서 구해진 짝수들의 총합 출력
+		
+		System.out.println("짝수들의 총 합 : " + sum);
+	}
+	
+	public void remind() {
+	//복습
+		
+		
+		/*변수만을 가지고 프로그래밍 했을 경우
+		int age1 =  15;
+		int age2 = 23;
+		int age3 = 50;
+		int age4 = 34;
+		int age5 = 25;
+		
+		for(int i=1; i<=5 ; i++) {
+			//System.out.println(agei);   // agei라는 변수명을 찾고있어서 안됨
+			//System.out.println(age + i); // age라는 변수명을 찾고있어서 안됨
+		}
+		*/
+		
+		
+		//배열가지고 프로그래밍
+		
+		int[] ages = new int[5];
+		
+		ages[0] = 15;
+		ages[1] = 23;
+		ages[2] = 50;
+		ages[3] = 34;
+		ages[4] = 25;
+		
+		int sum = 0;
+		for(int i=0; i<ages.length; i++) {
+			System.out.println(ages[i]);
+			sum += ages[i];
+		}
+		
 		
 	}
 	
