@@ -1,5 +1,6 @@
 package com.kh.run;
 import com.kh.array.A_Array;
+import com.kh.array.B_ArrayCopy;
 
 public class ArrayRun {
 	public static void main(String[] args) {
@@ -17,6 +18,15 @@ public class ArrayRun {
 		//a.method7();
 		//a.method8();
 		//a.method9();
-		a.method10();
+		//a.method10();
+		//a.method11();
+		
+		
+		B_ArrayCopy b = new B_ArrayCopy();
+		//b.method1();
+		//b.method2();
+		//b.method3();
+		//b.method4();
+		b.method5();
 	}
 }
