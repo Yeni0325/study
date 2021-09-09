@@ -48,6 +48,7 @@ public class MusicController {
 		return result;
 	}
 	
+	//1. 간단버전
 	public ArrayList<Music> searchMusic(String keyword) {
 		
 		//return값은 하나만 가능하기 때문에 , 객체배열 혹은 ArryList로 return값을 반환해줘야 한다.
@@ -61,6 +62,43 @@ public class MusicController {
 		}
 		//searchList => 텅 비어있을 수 있음 | 검색된 Music 객체들이 담겨있을 수 있음
 		return searchList;
+	}
+	
+	
+	public ArrayList<Music> searchMusic(int menu, String keyword) {
+		
+		ArrayList<Music> searchList = new ArrayList<>(); //검색결과를 보관할 리스트(현재 텅 비어있음)
+		if(menu == 1) { // => 곡명으로 검색
+			for(int i=0; i<list.size(); i++) {
+				if(list.get(i).getTitle().contains(keyword)){
+					searchList.add(list.get(i));
+				}
+			}
+		}else {// => 가수명으로 검색
+			for(int i=0; i<list.size(); i++) {
+				if(list.get(i).getArtist().contains(keyword)) {
+					searchList.add(list.get(i));
+				}
+			}
+		}
+		
+		return searchList;
+	}
+	
+	public int updateMusic(String title, String upArtist, String upTitle) {
+		
+		int result = 0;
+		for(int i=0; i<list.size(); i++) {
+			Music m = list.get(i);
+			if(list.get(i).getTitle().equals(title)) {
+				m.setTitle(upTitle);
+				m.setArtist(upArtist);
+				result = 1;
+				break;
+			}
+		}
+		// result == 0 (수정할 곡을 못찾을 경우) | 1(성공적으로 수정됨)
+		return result;
 	}
 	
 	
