@@ -394,7 +394,9 @@ SELECT SYSDATE FROM DUAL;
 -- * MONTHS_BETWEEN(DATE1, DATE2) : 두 날짜 사이의 개월 수를 반환해주는 함수 => 내부적으로 DATE1 - DATE2 후 나누기 30, 31이 진행된다
 --   => 결과값은 NUMBER타입
 -- EMPLOYEE에서 사원명, 입사일, 근무일수, 근무개월수
-SELECT EMP_NAME, HIRE_DATE, FLOOR(SYSDATE-HIRE_DATE) "근무일수", CEIL(MONTHS_BETWEEN(SYSDATE, HIRE_DATE)) || '개월차' "근무개월수"
+SELECT EMP_NAME, HIRE_DATE, 
+       FLOOR(SYSDATE-HIRE_DATE) "근무일수", 
+       CEIL(MONTHS_BETWEEN(SYSDATE, HIRE_DATE)) || '개월차' "근무개월수"
 FROM EMPLOYEE;
 
 -- * ADD_MONTHS(DATE, NUMBER) : 특정 날짜(DATE)에 해당 숫자(NUMBER)만큼의 개월수를 더해서 그 날짜를 리턴해주는 함수
@@ -427,6 +429,7 @@ ALTER SESSION SET NLS_LANGUAGE = KOREAN;
 
 -- * LAST_DAY(DATE) : 특정 날짜(DATE)가 포함된 달의 마지막 날짜를 반환해주는 함수
 --   => 결과값 DATE타입
+
 -- 이번달의 마지막 날짜
 SELECT LAST_DAY(SYSDATE) FROM DUAL;
 
@@ -497,7 +500,7 @@ SELECT TO_CHAR(SYSDATE, 'MON, YYYY') FROM DUAL; -- MON : 'N'월
 SELECT EMP_NAME, TO_CHAR(HIRE_DATE, 'YY-MM-DD') 
 FROM EMPLOYEE;
 
--- EMPLOYEE에서 사원들의 입사일('YYYYS년 MM월 DD일'형식) 조회
+-- EMPLOYEE에서 사원들의 입사일('YYYY년 MM월 DD일'형식) 조회
 --SELECT EMP_NAME, TO_CHAR(HIRE_DATE, 'YYYY년 MM월 DD일') -- 오류 발생 : '년', '월', '일'은 제공하는 포맷이 아닌, 임의로 제시한 문자값이기 때문에 포맷으로 반영이 불가능하다.
 SELECT EMP_NAME, TO_CHAR(HIRE_DATE, 'YYYY"년" MM"월" DD"일"')
 FROM EMPLOYEE;
@@ -580,11 +583,11 @@ SELECT TO_NUMBER('1,000,000', '9,999,999') + TO_NUMBER('550,000', '999,999') FRO
 
 -- * NVL(컬럼, 해당컬럼값이 NULL일 경우 반환할 값)
 
--- EMPLOYEE에서 전 사원의 이름, 
+-- EMPLOYEE에서 전 사원의 이름, 보너스(보너스가 없으면 0으로 표시) 조회
 SELECT EMP_NAME, NVL(BONUS, 0)
 FROM EMPLOYEE;
 
--- EMPLOYEE에 전 사원의 이름, 보너스가 보함된 연봉(보너스가 없으면 0으로 표시)
+-- EMPLOYEE에 전 사원의 이름, 보너스가 보함된 연봉(보너스가 없으면 0으로 표시) 조회
 SELECT EMP_NAME, (SALARY+SALARY*NVL(BONUS, 0))*12
 FROM EMPLOYEE;
 
@@ -660,4 +663,67 @@ SELECT EMP_NAME, SALARY,
             WHEN SALARY >= 3500000 THEN '중급'
             ELSE '초급'
         END
+FROM EMPLOYEE;
+
+------------------------------------ < 그룹함수 > ----------------------------------------
+-- 1. SUM(숫자타입컬럼) : 해당 컬럼 값들의 총 합계를 구해서 반환해주는 함수
+
+-- EMPLOYEE에 전사원의 총 급여합
+SELECT SUM(SALARY)
+FROM EMPLOYEE; -- 전체사원이 하나의 그룹으로 묶여있음
+
+
+-- EMPLOYEE에 남자사원들의 총 급여합
+SELECT SUM(SALARY)
+FROM EMPLOYEE
+WHERE SUBSTR(EMP_NO, 8, 1) IN ('1','3'); -- 남자사원들이 한 그룹으로 묶임
+
+-- EMPLOYEE에 부서코드가 D5인 사원들의 총 연봉합
+SELECT SUM(SALARY * 12) --, EMP_NAME   -- 오류발생 -->  SUM(SALARY * 12) 와 EMP_NAME의 결과값의 행 수가 동일하지 않기 때문에 오류가 발생!
+FROM EMPLOYEE                         --              그룹함수와 일반컬럼, 단일행함수는 함께 사용하지 못한다!                
+WHERE DEPT_CODE = 'D5';
+
+-- 2. AVG(숫자타입컬럼) : 해당 컬럼값들의 평균값을 구해서 반환해주는 함수
+
+-- EMPLOYEE에 전체 사원의 평균 급여 조회
+SELECT ROUND(AVG(SALARY))  --> 결과값이 숫자타입이기 때문에 숫자타입함수 사용가능!
+FROM EMPLOYEE;
+
+
+-- 3. MIN(모든타입컬럼) : 해당 컬럼값들 중에 가장 작은 값을 구해서 반환해주는 함수
+
+-- EMPLOYEE에 사원들 중 가장 작은 이름과 현재 급여값들 중 최저급여, 가장 먼저 입사한 날짜 조회
+SELECT MIN(EMP_NAME), MIN(SALARY), MIN(HIRE_DATE)
+FROM EMPLOYEE;
+
+-- 4. MAX(모든타입컬럼) : 해당 컬럼값들 중에 가장 큰 값을 구해서 반환해주는 함수
+
+-- EMPLOYEE에 사원들 중 가장 큰 이름과 현재 급여값들 중 최대급여, 가장 늦게 입사한 날짜 조회
+SELECT MAX(EMP_NAME), MAX(SALARY), MAX(HIRE_DATE)
+FROM EMPLOYEE;
+
+-- COUNT(*|컬럼|DISTINCT 컬럼) : 조회된 행 갯수를 세서 반환해주는 함수 
+-- COUNT(*) : 조회된 결과의 모든 행 갯수를 세서 반환
+-- COUNT(컬럼) : 제시한 해당 컬럼값이 NULL이 아닌 것만 행 갯수를 세서 반환
+-- COUNT(DISTINCT 컬럼) : 해당 컬럼값에 중복을 제거한 후 행 갯수를 세서 반환
+
+-- EMPLOYEE에 전체 사원 수 조회
+SELECT COUNT(*)
+FROM EMPLOYEE;
+
+-- EMPLOYEE에 여자 사원 수 조회
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE SUBSTR(EMP_NO, 8, 1) IN ('2','4');
+
+-- EMPLOYEE에 보너스를 받고 있는 사원 수 조회
+SELECT COUNT(BONUS)
+FROM EMPLOYEE;
+
+-- EMPLOYEE에 부서배치를 받은 사원 수 조회
+SELECT COUNT(DEPT_CODE)
+FROM EMPLOYEE;
+
+-- EMPLOYEE에 현재 사원들이 총 몇개의 부서에 분포되어있는지 조회
+SELECT COUNT(DISTINCT DEPT_CODE)
 FROM EMPLOYEE;
