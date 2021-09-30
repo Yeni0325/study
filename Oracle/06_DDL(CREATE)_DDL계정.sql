@@ -306,3 +306,242 @@ CREATE TABLE TB_LIKE(
 INSERT INTO TB_LIKE VALUES(1, 'A', SYSDATE);
 INSERT INTO TB_LIKE VALUES(1, 'B', SYSDATE);
 INSERT INTO TB_LIKE VALUES(1, 'A', SYSDATE);
+
+------------------------------------------------------------------------------------------
+
+-- 회원등급에 대한 데이터를 따로 보관하는 테이블
+CREATE TABLE MEM_GRADE(
+    GRADE_CODE NUMBER PRIMARY KEY,
+    GRADE_NAME VARCHAR2(30) NOT NULL
+);
+
+INSERT INTO MEM_GRADE VALUES(10, '일반회원');
+INSERT INTO MEM_GRADE VALUES(20, '우수회원');
+INSERT INTO MEM_GRADE VALUES(30, '특별회원');
+
+SELECT * FROM MEM_GRADE;
+
+CREATE TABLE MEM(
+    MEM_NO NUMBER PRIMARY KEY,
+    MEM_ID VARCHAR2(20) NOT NULL UNIQUE,
+    MEM_PWD VARCHAR2(20) NOT NULL, 
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3) CHECK(GENDER IN ('남', '여')),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    GRADE_ID NUMBER --> 회원등급번호를 같이 보관할 컬럼
+);
+
+INSERT INTO MEM VALUES(1, 'user01', 'pass01', '홍길순', '여', null, null, null);
+INSERT INTO MEM VALUES(2, 'user02', 'pass02', '김말똥', null, null, null, 10);
+INSERT INTO MEM VALUES(3, 'user03', 'pass03', '강개순', null, null, null, 40);
+--> 유효한 회원등급번호가 아님에도 불구하고 잘 insert 되버림
+
+------------------------------------------------------------------------------------------
+
+/*
+    * FOREIGN KEY(외래키) 제약조건
+      다른 테이블에 존재하는 값만 들어와야하는 특정 칼럼에 부여하는 제약조건
+      --> 다른 테이블을 참조한다고 표현
+      --> 주로 FOREIGN KEY 제약조건에 의해 테이블 간의 관계가 형성됨!
+      
+      > 컬럼레벨방식
+      컬럼명 자료형 [CONSTRAINT 제약조건명] REFERENCES 참조할테이블명(참조할컬럼명)
+      
+      > 테이블레벨방식
+      [CONSTRAINT 제약조건명] FOREIGN KEY(컬럼명) REFERENCES 참조할테이블명(참조할컬럼명)
+      
+      --> 참조할컬럼명 생략 시 참조할테이블에 PRIMARY KEY로 지정된 컬럼으로 매칭!
+*/
+
+-- 외래키 적용해서 MEM테이블 생성
+DROP TABLE MEM;
+
+CREATE TABLE MEM(
+    MEM_NO NUMBER PRIMARY KEY,
+    MEM_ID VARCHAR2(20) NOT NULL UNIQUE,
+    MEM_PWD VARCHAR2(20) NOT NULL, 
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3) CHECK(GENDER IN ('남', '여')),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    GRADE_ID NUMBER REFERENCES MEM_GRADE(GRADE_CODE) --> 컬럼레벨방식
+    --, FOREIGN KEY(GRADE_IN) REFERENCES MEM_GRADE(GRADE_CODE) --> 테이블레벨방식
+);
+
+INSERT INTO MEM VALUES(1, 'user01', 'pass01', '홍길순', '여', null, null, null);
+--> 외래키 제약조건이 부여된 컬럼에 기본적으로 NULL 허용됨
+INSERT INTO MEM VALUES(2, 'user02', 'pass02', '김말똥', null, null, null, 10);
+INSERT INTO MEM VALUES(3, 'user03', 'pass03', '강개순', null, null, null, 40); 
+-- "parent key not found" 오류 발생 --> 40이라는 값을 MEM_GRADE테이블에서 발견할 수 없다는 뜻
+INSERT INTO MEM VALUES(3, 'user03', 'pass03', '강개순', null, null, null, 20);
+INSERT INTO MEM VALUES(4, 'user04', 'pass04', '홍길동', null, null, null, 10); 
+
+-- MEM_GRADE(부모테이블) -|--------<- MEM(자식테이블) : 1 대 다 관계
+
+--> 이때 부모테이블(MEM_GRADE)에서 데이터값을 삭제할 경우 어떤문제
+-- 데이터 삭제 : DELETE FROM 테이블명 WHERE 조건;
+
+--> MEM_GRADE 테이블에서 10번 등급 삭제
+DELETE FROM MEM_GRADE WHERE GRADE_CODE = 10;
+--> 오류발생 : 자식테이블(MEM)에 10이라는 값을 사용하기 있기 때문에 삭제가 안됨
+
+DELETE FROM MEM_GRADE WHERE GRADE_CODE = 30;
+--> 자식테이블(MEM)에 30이라는 값을 사용하고 있지 않기 때문에 삭제가 잘됨
+
+--> 자식테이블에 이미 사용하고 있는 값이 있을 경우
+--  부모테이블로부터 무조건 삭제가 안되는 "삭제제한" 옵션이 걸려있음 
+
+ROLLBACK;
+
+----------------------------------------------------------------------------------------
+
+/*
+    자식테이블 생성 시 외래키 제약조건을 부여할 때 삭제옵션 지정가능
+    * 삭제옵션 : 부모테이블의 데이터 삭제 시 해당 데이터를 사용하고 있는 자식테이블의 값을 
+                어떻게 처리할건지 지정하는 옵션
+                
+    - ON DELETE RESTRICTED(기본값) : 삭제제한옵션으로, 자식데이터로 쓰이는 부모데이터는 삭제가 아예 안되게끔 제한
+    - ON DELETE SET NULL : 부모데이터 삭제 시 해당 데이터를 쓰고 있는 자식데이터의 값을 NULL로 변경시키는 옵션
+    - ON DELETE CASCADE : 부모데이터 삭제 시 해당 데이터를 쓰고 있는 자식데이터도 같이 삭제시키는 옵션
+*/
+
+DROP TABLE MEM;
+
+-- ON DELETE SET NULL 삭제옵션 부여
+CREATE TABLE MEM(
+    MEM_NO NUMBER PRIMARY KEY,
+    MEM_ID VARCHAR2(20) NOT NULL UNIQUE,
+    MEM_PWD VARCHAR2(20) NOT NULL, 
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3) CHECK(GENDER IN ('남', '여')),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    GRADE_ID NUMBER REFERENCES MEM_GRADE ON DELETE SET NULL
+);
+
+INSERT INTO MEM VALUES(1, 'user01', 'pass01', '홍길순', '여', null, null, null);
+--> 외래키 제약조건이 부여된 컬럼에 기본적으로 NULL 허용됨
+INSERT INTO MEM VALUES(2, 'user02', 'pass02', '김말똥', null, null, null, 10);
+INSERT INTO MEM VALUES(3, 'user03', 'pass03', '강개순', null, null, null, 20);
+INSERT INTO MEM VALUES(4, 'user04', 'pass04', '홍길동', null, null, null, 10);
+
+-- 10번 등급 삭제
+DELETE FROM MEM_GRADE WHERE GRADE_CODE = 10;
+--> 잘 삭제됨 (단, 10을 가져다 쓰고 있던 자식데이터 값은 NULL로 변경)
+
+ROLLBACK;
+DROP TABLE MEM;
+
+-- ON DELETE CASCADE 삭제옵션 부여
+CREATE TABLE MEM(
+    MEM_NO NUMBER PRIMARY KEY,
+    MEM_ID VARCHAR2(20) NOT NULL UNIQUE,
+    MEM_PWD VARCHAR2(20) NOT NULL, 
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3) CHECK(GENDER IN ('남', '여')),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    GRADE_ID NUMBER REFERENCES MEM_GRADE ON DELETE CASCADE
+);
+
+INSERT INTO MEM VALUES(1, 'user01', 'pass01', '홍길순', '여', null, null, null);
+--> 외래키 제약조건이 부여된 컬럼에 기본적으로 NULL 허용됨
+INSERT INTO MEM VALUES(2, 'user02', 'pass02', '김말똥', null, null, null, 10);
+INSERT INTO MEM VALUES(3, 'user03', 'pass03', '강개순', null, null, null, 20);
+INSERT INTO MEM VALUES(4, 'user04', 'pass04', '홍길동', null, null, null, 10);
+
+-- 10번 등급 삭제
+DELETE FROM MEM_GRADE WHERE GRADE_CODE = 10; 
+--> 잘 삭제됨 (단, 해당 데이터를 사용하고 있던 자식데이터도 같이 DELET됨)
+
+------------------------------------------------------------------------------------------
+
+/*
+    < DEFAULT 기본값 > **제약조건 아님!! **
+    컬럼을 선정하지 않고 INSERT시 NULL이 아닌 기본값을 INSERT하고자 할 때 세팅해둘 수 있는 값
+*/
+DROP TABLE MEMBER;
+-- 컬럼명 자료형 DEFAULT 기본값
+CREATE TABLE MEMBER(
+    MEM_NO NUMBER PRIMARY KEY,
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    MEM_AGE NUMBER, 
+    HOBBY VARCHAR2(20) DEFAULT '없음',
+    ENROLL_DATE DATE DEFAULT SYSDATE -- 회원가입일
+);
+
+-- INSERT INTO 테이블명 VALUES(컬럼값, 컬럼값, 컬럼값, ...);
+INSERT INTO MEMBER VALUES(1, '강길동', 20, '운동', '19/12/13');
+INSERT INTO MEMBER VALUES(2, '홍길순', NULL, NULL, NULL);
+INSERT INTO MEMBER VALUES(3, '김말똥', NULL, DEFAULT, DEFAULT);
+
+-- INSERT INTO 테이블명(컬럼명, 컬럼명) VALUES(컬럼값, 컬럼값);
+INSERT INTO MEMBER(MEM_NO, MEM_NAME) VALUES(4, '강개순');
+--> 선택되지 않은 컬럼에는 기본적으로 NULL이 들어감
+--  단, 해당 컬럼에 DEFALUT값이 부여되어있을 경우 NULL이 아닌 DEFAULT값이 들어감
+
+--=========================================================================================
+
+/*
+    ======================================= KH 계정 ========================================
+    < SUBQUERY를 이용한 테이블 생성>
+    테이블 복사뜨는 개념
+    
+    [표현식]
+    CREATE TABLE 테이블명 
+    AS 서브쿼리;
+    
+*/
+-- EMPLOYEE 테이블을 복제한 새로운 테이블 생성 
+CREATE TABLE EMPLOYEE_COPY
+AS SELECT *
+   FROM EMPLOYEE;
+   
+SELECT * FROM EMPLOYEE_COPY;
+--> 컬럼, 데이터값, 제약조건 같은 경우 NOT NULL만 복사됨
+
+-- EMPLOYEE 테이블을 복제한 새로운 테이블 생성2
+CREATE TABLE EMPLOYEE_COPY2
+AS SELECT EMP_ID, EMP_NAME, SALARY, BONUS
+   FROM EMPLOYEE
+   WHERE 1 = 0; --> 구조만을 복사하고자 할 때 쓰이는 구문 (즉, 데이터값은 필요가 없고, 컬럼만 필요있을 때 사용)
+
+SELECT * FROM EMPLOYEE_COPY2;
+
+-- EMPLOYEE 테이블을 복제한 새로운 테이블 생성3
+CREATE TABLE EMPLOYEE_COPYE3
+AS SELECT EMP_ID, EMP_NAME, SALARY, SALARY * 12 "연봉"
+   FROM EMPLOYEE;
+-- "must name this expression with a column alias" : alias 별칭 오류발생
+-- 서브쿼리 SELECT절에 산술식 또는 함수식이 작성되어있을 경우 반드시 별칭을 지정해줘야 한다.
+
+SELECT EMP_NAME, 연봉
+FROM EMPLOYEE_COPYE3;
+
+---------------------------------------------------------------------------------------
+
+/*
+    * 테이블 다 생성된 후에 뒤늦게 제약조건 추가하는 방법
+    
+    ALTER TABLE 테이블명 변경할내용;
+    
+    - PRIMARY KEY 제약조건 추가  : ALTER TABLE 테이블명 ADD PRIMARY KEY(컬럼명);
+    - FOREIGEN KEY 제약조건 추가 : ALTER TABLE 테이블명 ADD FOREIGN KEY(컬럼명) REFERENCES 참조할테이블명[(참조할컬럼명)];
+    - UNIQUE 제약조건 추가       : ALTER TABLE 테이블명 ADD UNIQUE(컬럼명);
+    - CHECK 제약조건 추가        : ALTER TABLE 테이블명 ADD CHECK(컬럼에대한조건식);
+    - NOT NULL 제약조건 추가     : ALTER TABLE 테이블명 MODIFY 컬럼명 NOT NULL;
+*/
+
+-- EMPLOYEE_COPY 테이블에 PRIMARY KEY 제약조건 추가 (EMP_ID)
+ALTER TABLE EMPLOYEE_COPY ADD PRIMARY KEY(EMP_ID);
+
+-- EMPLOYEE 테이블에 DEPT_CODE에 외래키제약조건 추가 (참조하는테이블(부모) : DEPARTMENT(DEPT_ID))
+ALTER TABLE EMPLOYEE ADD FOREIGN KEY(DEPT_CODE) REFERENCES DEPARTMENT; 
+-- DEPT_ID는 RPIMARY KEY로 설정되어있기 때문에 생략가능
+
+-- EMPLOYEE 테이블에 JOB_CODE에 외래키제약조건 추가 (JOB 테이블 참조)
+ALTER TABLE EMPLOYEE ADD FOREIGN KEY(JOB_CODE) REFERENCES JOB;
+
+-- DEPARTMENT 테이블에 LOCATION_ID에 외래키제약조건 추가 (LOCATION테이블 참조)
+ALTER TABLE DEPARTMENT ADD FOREIGN KEY(LOCATION_ID) REFERENCES LOCATION;
