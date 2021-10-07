@@ -296,3 +296,195 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE(EMP.EMP_NAME || '은 ' || DNAME || '입니다.');
 END;
 /
+
+------------------------------------------------------------------------------------------
+
+-- < 반복문 >
+
+/*
+    1) BAISC LOOP 문
+    
+    [표현법]
+    LOOP 
+        반복적으로 실행할 구문;                => (기본적으로 무한반복, 자바에서의 WHILE문)
+        * 반복문을 빠져나갈 수 있는 구문`
+    END LOOP;
+    
+    * 반복문을 빠져나갈 수 있는 구문 (2가지)
+    1) IF 조건식 THEN EXIT; END IF;    => 해당 조건식이 참일경우 EXIT을 통해 빠져나가겠다.
+    2) EXIT WHEN 조건식;               => EXIT 빠져나가겠다. WHEN? 해당 조건식이 참일경우 
+    
+*/
+
+-- 1~5까지 순차적으로 1씩 증가하는 값을 출력
+SET SERVEROUTPUT ON;
+DECLARE
+    I NUMBER := 1;     --> 대입과 동시에 초기화
+BEGIN
+    
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(I);
+        I := I + 1;                   --> 자바에서는 I++라는 증감연산자가 존재했지만 SQL에서는 이와같이 표현해야함
+        
+        -- IF I = 6 THEN EXIT; END IF;
+        EXIT WHEN I = 6;
+    END LOOP;
+    
+END;
+/
+
+-----------------------------------------------------------------------------------------
+
+/*
+    2) FOR LOOP 문
+    
+    [표현법]
+    FOR 변수 IN [REVERSE] 초기값..최종값         => 초기값부터 최종값까지 매번 1씩 증가하면서 알아서 반복이 된다. 
+    LOOP                                       =>  REVERSE 를 붙이면 최종값부터 초기값까지 1씩 감소된다. 
+        반복적으로 실행할 구문;                   => (자바에서의 FOR문)
+    END LOOP;
+*/
+-- FOR LOOP문의 경우 FOR LOOP문 안에서 변수를 선언하는 구문이 존재하므로 DECLEAR 선언부 생략이 가능하다.
+BEGIN
+    FOR I IN 1..5
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(I);
+    END LOOP;
+END;
+/
+
+BEGIN
+    FOR I IN REVERSE 1..5             --> 최종값부터 초기값까지 1씩 감소된 값 출력
+    
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(I);
+    END LOOP;
+END;
+/
+
+DROP TABLE TEST;
+
+CREATE TABLE TEST(
+    TNO NUMBER PRIMARY KEY,
+    TDATE DATE
+);
+
+CREATE SEQUENCE SEQ_TNO
+START WITH 1
+INCREMENT BY 2
+MAXVALUE 1000
+NOCYCLE
+NOCACHE;
+
+-- TEST 테이블에 반복문을 활용해서 데이터 값 넣기
+BEGIN
+    FOR I IN 1..100
+    LOOP
+        INSERT INTO TEST VALUES(SEQ_TNO.NEXTVAL, SYSDATE);
+    END LOOP;
+    
+END;
+/
+
+SELECT * FROM TEST;
+
+------------------------------------------------------------------------------------------
+
+/*
+    3) WHILE LOOP 문
+    
+    [표현법]
+    WHILE 반복문이수행될조건      --> 참이어야 반복문이 수행되고, 거짓이되는 순간 반복문을 빠져나옴
+    LOOP
+        반복적으로 실행할 구문;
+    END LOOP;
+*/
+
+DECLARE
+    I NUMBER := 1;
+BEGIN
+    
+    WHILE I < 6
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(I);
+        I := I + 1;
+    END LOOP;
+END;
+/
+
+---------------------------------------------------------------------------------------
+
+/*
+    3. EXCEPTION SECTION 예외처리부
+    
+    예외(EXCEPTION) : 실행 중 발생하는 오류
+    
+    [표현법]
+    EXCEPTION                                 => 자바에서의 TRY~CATCH문
+        WHEN 예외명1 THEN 예외처리구문1;        => TRY가 BEGIN문에 해당, WHEN ~ THEN 부분이 CATCH문에 해당 
+        WHEN 예외명2 THEN 예외처리구문2;
+        ...
+        WHEN OTHERS THEN 예외처리구문N;         => 어떤 예외가 발생하던간에 OTHERS를 사용하면 모든 예외에 대한 예외처리구문 작성이 가능하다.
+
+        
+        * 시스템 예외 (오라클에서 미리 정의해둔 예외)
+        - NO_DATA_FOUND : SELECT한 결과가 한 행도 없을 경우
+        - TOO_MANY_ROWS : SELECT한 결과가 여러행일 경우
+        - ZERO_DEVIDE : 0으로 나눌 때 
+        - DUP_VAL_ON_INDEX : UNIQUE 제약조건에 위배되었을 경우 (중복된 값이 있다)
+        ... 
+*/
+
+-- 사용자가 입력한 수로 나눗셈 연산한 결과 출력
+DECLARE
+    RESULT NUMBER;
+BEGIN
+    RESULT := 10 / &숫자;
+    DBMS_OUTPUT.PUT_LINE('결과 : ' || RESULT);
+EXCEPTION
+    --WHEN ZERO_DIVIDE THEN DBMS_OUTPUT.PUT_LINE('나누기 연산 시 0으로 나눌 수 없습니다.');
+    WHEN OTHERS THEN DBMS_OUTPUT.PUT_LINE('나누기 연산 시 0으로 나눌 수 없습니다.');
+END;
+/
+
+-- UNIQUE 제약조건 위배
+BEGIN
+    UPDATE EMPLOYEE
+       SET EMP_ID = '&변경할사번'
+     WHERE EMP_NAME = '노옹철';
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN DBMS_OUTPUT.PUT_LINE('이미 존재하는 사번입니다.');
+END;
+/
+
+DECLARE
+    EID EMPLOYEE.EMP_ID%TYPE;
+    ENAME EMPLOYEE.EMP_NAME%TYPE;
+BEGIN
+    SELECT EMP_ID, EMP_NAME
+      INTO EID, ENAME
+      FROM EMPLOYEE
+     WHERE MANAGER_ID = &사수사번;
+     
+     DBMS_OUTPUT.PUT_LINE('사번 : ' || EID);
+     DBMS_OUTPUT.PUT_LINE('이름 : ' || ENAME);
+EXCEPTION
+    WHEN TOO_MANY_ROWS THEN DBMS_OUTPUT.PUT_LINE('너무 많은 행이 조회되었습니다.');
+    WHEN NO_DATA_FOUND THEN DBMS_OUTPUT.PUT_LINE('조회 결과가 없습니다.');
+END;
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
